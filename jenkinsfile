@@ -10,7 +10,7 @@ pipeline {
     }
 
     environment {
-        IMAGE_NAME = 'mypipeline' // We'll tag the image with this name
+        IMAGE_NAME = 'python-app' // We'll tag the image with this name
     }
 
     stages {
@@ -37,7 +37,7 @@ pipeline {
         stage('Run Docker Container') {
             steps {
                 script {
-                    sh "docker run --rm $IMAGE_NAME" // Runs the image and removes the container after
+                    sh "docker run -d --name python-service $IMAGE_NAME" // Runs the image and removes the container after
                 }
             }
         }
