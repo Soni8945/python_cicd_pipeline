@@ -1,0 +1,32 @@
+version: "3.8"
+
+services:
+    db :
+      image: postgres:14 # Use a specific PostgreSQL version
+      restart: always # Always restart if it crashes
+      environment:
+        POSTGRES_DB: postgres
+        POSTGRES_USER: remoteuser1
+        POSTGRES_PASSWORD: 12345678
+      volumes:
+          # Persist database data to a named volume
+          - db_data:/var/lib/postgresql/data
+
+    app: 
+      build: .  
+      ports:
+        - "5000:5000"
+      
+      environment:
+          DB_USER :  remoteuser1
+          DB_PASS :  12345678
+          DB_HOST :  10.36.0.134
+          DB_NAME :  postgres
+
+      depends_on:
+        - db
+
+volumes:
+  db_data: # Define the named volume for data persistence
+  
+

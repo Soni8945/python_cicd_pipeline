@@ -1,0 +1,189 @@
+pipeline {
+    agent {
+        docker {
+            image 'docker:latest'  // Use a Docker CLI image
+            args '-v /var/run/docker.sock:/var/run/docker.sock\
+                    --user root \
+                    -v /home/appadmin/Desktop/jenkins/myproject:/home/appadmin/Desktop/jenkins/myproject \
+                    -e HOME=/home/appadmin/Desktop/jenkins/myproject' // Access host Docker
+        }
+    }
+
+    environment {
+        IMAGE_NAME = 'mypipeline' // We'll tag the image with this name
+    }
+
+    stages {
+
+        // 👇 This stage pulls your Git repo code into the Jenkins workspace
+        stage('Checkout Code') {
+            steps {
+                //git branch: 'main', url: 'https://github.com/Soni8945/cicd-pipeline'
+                // ⬇️ This is where Jenkins pulls from the Git repository (defined in Jenkins Job UI)
+                checkout scm
+            }
+        }
+
+        // 👇 Build Docker image using the Dockerfile from the pulled repo
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    sh "docker build -t $IMAGE_NAME ." // Builds image from current directory
+                }
+            }
+        }
+
+        // 👇 Run the built Docker container
+        stage('Run Docker Container') {
+            steps {
+                script {
+                    sh "docker run --rm $IMAGE_NAME" // Runs the image and removes the container after
+                }
+            }
+        }
+    }
+} 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// // Jenkinsfile
+// pipeline {
+//     // Define an agent with Docker capabilities.
+//     // 'docker:latest' is used here to allow Docker commands directly within the agent.
+//     // It requires Docker-in-Docker setup or mounting the Docker socket.
+//     // For simplicity, we'll assume the Jenkins agent has Docker accessible.
+//     agent {
+//         docker {
+//             image 'docker:latest' // Use the Docker image for Docker commands
+//             // Ensure the Docker daemon socket is mounted for 'docker build' and 'docker push'
+//             args '-v /var/run/docker.sock:/var/run/docker.sock'
+//         }
+//     }
+
+//     // Environment variables that might be needed across stages
+//     environment {
+//         // Tag for your Docker image, incorporating the build number
+//         // This makes each image unique per build
+//         DOCKER_IMAGE_NAME = "mypipeline"
+//         DOCKER_IMAGE_TAG = "${DOCKER_IMAGE_NAME}:${env.BUILD_NUMBER}"
+//         // Replace 'your-docker-registry' with your actual Docker registry URL (e.g., yourusername/ or myregistry.com/myusername/)
+//         // DOCKER_REGISTRY = "your-docker-registry" // e.g., "myusername" or "registry.example.com/project"
+//         FULL_IMAGE_NAME = "${DOCKER_REGISTRY}/${DOCKER_IMAGE_TAG}"
+//     }
+
+//     stages {
+//         stage('Checkout Source Code') {
+//             steps {
+//                 // This step automatically checks out the source code from your SCM (e.g., Git)
+//                 // configured in the Jenkins job.
+//                 script {
+//                     echo "Checking out source code..."
+//                     // 'checkout scm' checks out the repository configured in the Jenkins job
+//                     checkout scm
+//                     echo "Source code checked out successfully."
+//                 }
+//             }
+//         }
+
+//         stage('Build Docker Image') {
+//             steps {
+//                 script {
+//                     echo "Building Docker image: ${FULL_IMAGE_NAME}"
+//                     // Build the Docker image using the Dockerfile in the current directory.
+//                     // The --pull flag always attempts to pull a newer version of the base image.
+//                     // The -t flag tags the image with the specified name and tag.
+//                     sh "docker build --pull -t ${FULL_IMAGE_NAME} ."
+//                     echo "Docker image built successfully."
+//                 }
+//             }
+//         }
+
+//         stage('Run Unit/Integration Tests') {
+//             // For a simple 'Hello World', we'll simulate a test by just running the container
+//             // and checking its output. In a real application, you'd run your actual test suite here.
+//             agent {
+//                 docker {
+//                     // This stage can use the newly built image for testing
+//                     image "${FULL_IMAGE_NAME}"
+//                     // No args needed here as we are just running the container
+//                 }
+//             }
+//             steps {
+//                 script {
+//                     echo "Running tests by executing the container..."
+//                     // Execute the container and capture its output
+//                     def output = sh(script: "python app.py", returnStdout: true).trim()
+//                     echo "Container output: ${output}"
+
+//                     // Assert that the output matches expected 'Hello, World!'
+//                     if (!output.contains("Hello, World!")) {
+//                         error "Test failed: Expected 'Hello, World!' but got '${output}'"
+//                     } else {
+//                         echo "Test passed: Container produced expected output."
+//                     }
+//                     // In a real project, this would be:
+//                     // sh "pytest" or "npm test" or "mvn test"
+//                 }
+//             }
+//         }
+
+//         stage('Push Docker Image') {
+//             steps {
+//                 script {
+//                     echo "Attempting to push Docker image to registry: ${DOCKER_REGISTRY}"
+//                     // Ensure you have configured Docker credentials in Jenkins if pushing to a private registry
+//                     // For Docker Hub, you might configure a 'Docker Hub' credential in Jenkins.
+//                     // If your registry requires authentication, you'd use 'docker.withRegistry' block:
+//                     // docker.withRegistry('https://${DOCKER_REGISTRY}', 'docker-hub-credentials-id') {
+//                     //    sh "docker push ${FULL_IMAGE_NAME}"
+//                     // }
+
+//                     // For now, let's just push assuming anonymous or pre-configured login
+//                     sh "docker push ${FULL_IMAGE_NAME}"
+//                     echo "Docker image pushed successfully."
+//                 }
+//             }
+//         }
+
+//         stage('Deploy (Placeholder)') {
+//             steps {
+//                 script {
+//                     echo "Deployment stage: In a real scenario, you would deploy your Docker image here."
+//                     echo "This could involve deploying to Kubernetes, EC2, Azure Container Instances, etc."
+//                     echo "Image to deploy: ${FULL_IMAGE_NAME}"
+//                 }
+//             }
+//         }
+//     }
+
+//     // Post-build actions: e.g., send notifications
+//     post {
+//         always {
+//             echo 'Pipeline finished.'
+//         }
+//         success {
+//             echo 'Pipeline executed successfully!'
+//             // Add notification logic here (e.g., email, Slack)
+//         }
+//         failure {
+//             echo 'Pipeline failed!'
+//             // Add notification logic here (e.g., email, Slack)
+//         }
+//     }
+// }
