@@ -101,7 +101,7 @@ def delete_item(id):
             return jsonify({f"erroe occured": str(e)})
         
 # ---- RUN THE MAIN APP ------
-if __name__ == '__main__':
-    app.run(port = 5000 , host='0.0.0.0')
+# if __name__ == '__main__':
+#     app.run(port = 5000 , host='0.0.0.0')
 
     
