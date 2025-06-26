@@ -84,7 +84,7 @@ def select_by_id(id):
     item = table_submission.query.get(id)
     if item: 
         return jsonify(item.to_dict())
-    return jsonify({f"error: item id {id}not found "})
+    return jsonify({"error": f"item id {id} not found "})
 
 # ------DELETE THE ITEM BY THEIR ID ---------
 @app.route('/delete/<int:id>', methods=['DELETE'])
