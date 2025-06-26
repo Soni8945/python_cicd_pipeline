@@ -29,7 +29,7 @@ class table_submission(db.Model):
     first_name = db.Column(db.String(50), nullable=False)
     last_name = db.Column(db.String(50), nullable=False)
     department = db.Column(db.String(50), nullable=False )
-    salary = db.Column(db.Integer() , primary_key=True)
+    salary = db.Column(db.Integer() , primary_key=False)
 
     def __returnname__(self):
         return f'(table_submission {self.name})'
@@ -80,8 +80,7 @@ def select_all_items():
 # -------FETCH DATA BY THEIR ID----------- 
 @app.route('/all/<int:id>' , methods=['GET'])
 def select_by_id(id):
-    
-    item = table_submission.query.get(id)
+    item = db.session.get(table_submission , id)
     if item: 
         return jsonify(item.to_dict())
     return jsonify({"error": f"item id {id} not found "})
@@ -89,19 +88,19 @@ def select_by_id(id):
 # ------DELETE THE ITEM BY THEIR ID ---------
 @app.route('/delete/<int:id>', methods=['DELETE'])
 def delete_item(id):
-    item = db.session.get(table_submission , id)
-    if not id:
-        return jsonify({f"error message that item id {id} not found"})
+    item = db.session.get(table_submission,id)
+    if not item:
+        return jsonify({f"error message that item id {item} not found"})
     else:
         try:
-            db.session.delete(id)
+            db.session.delete(item)
             db.session.commit()
             return jsonify({f"message : item deleted successfully"})
         except Exception as  e:
-            return jsonify({f"erroe occured": str(e)})
+            return jsonify({f"error occured": str(e)})
         
 # ---- RUN THE MAIN APP ------
-# if __name__ == '__main__':
-#     app.run(port = 5000 , host='0.0.0.0')
+if __name__ == '__main__':
+    app.run(port = 5000 , host='0.0.0.0')
 
     
