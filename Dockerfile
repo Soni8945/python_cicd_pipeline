@@ -8,7 +8,7 @@ WORKDIR /app
 COPY requirement.txt .
 RUN pip install --upgrade pip
 RUN pip install --no-cache-dir -r requirement.txt
-Run pip install gunicorn
+RUN pip install gunicorn
 
 # Copy the current directory contents into the container at /app
 COPY writtenby.py /app/
