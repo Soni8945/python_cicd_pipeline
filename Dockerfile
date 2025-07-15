@@ -17,4 +17,4 @@ COPY config.ini .
 EXPOSE 7000
 
 # Run the Python script when the container starts
-CMD ["gunicorn", "writtenby:app", "--bind", "10.36.0.134:7000", "--workers", "4"] 
+CMD ["gunicorn", "writtenby:app", "--bind", "0.0.0.0:7000", "--workers", "4"] 
