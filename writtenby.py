@@ -11,6 +11,12 @@ db_user = os.getenv('DB_USER')
 db_pass = os.getenv('DB_PASS')
 host = os.getenv('DB_HOST')
 
+print(dbname)
+print(db_user)
+print(db_pass)
+print(host)
+
+
 app.config['SQLALCHEMY_DATABASE_URI'] = (
     f"postgresql+psycopg2://{db_user}:{db_pass}@{host}/{dbname}?sslmode=disable"
 )
