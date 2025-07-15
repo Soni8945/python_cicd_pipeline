@@ -37,7 +37,7 @@ pipeline {
         stage('Run Docker Container') {
             steps {
                 script {
-                    sh "docker run -d --name python-service --network host $IMAGE_NAME" // Runs the image and removes the container after
+                    sh "docker run -d -p 7000:7000 --name python-service --network host $IMAGE_NAME" // Runs the image and removes the container after
                 }
             }
         }

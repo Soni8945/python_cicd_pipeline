@@ -1,24 +1,21 @@
 from flask import Flask, jsonify , request 
 from flask_sqlalchemy import SQLAlchemy
 import configparser
-
+# import DateTime
+import os
 app = Flask(__name__)
 
-def read_file_for_database_conn(filepath = 'config.ini'):
-    config = configparser.ConfigParser()
-    config.read(filepath)
-    return config['Database']
-
-config = read_file_for_database_conn()
-dbname  = config.get('db_name')
+dbname  = os.getenv('DB_NAME')
 # db_port  = config.getint('port')
-db_user = config.get('db_user')
-db_pass = config.get('db_pass')
-host = config.get('host')
+db_user = os.getenv('DB_USER')
+db_pass = os.getenv('DB_PASS')
+host = os.getenv('DB_HOST')
 
 app.config['SQLALCHEMY_DATABASE_URI'] = (
     f"postgresql+psycopg2://{db_user}:{db_pass}@{host}/{dbname}?sslmode=disable"
 )
+
+print("Connecting to:", app.config['SQLALCHEMY_DATABASE_URI'])
 
 db = SQLAlchemy(app)
 
@@ -29,7 +26,7 @@ class table_submission(db.Model):
     first_name = db.Column(db.String(50), nullable=False)
     last_name = db.Column(db.String(50), nullable=False)
     department = db.Column(db.String(50), nullable=False )
-    salary = db.Column(db.Integer() , primary_key=False)
+    salary = db.Column(db.Integer() , primary_key=True)
 
     def __returnname__(self):
         return f'(table_submission {self.name})'
@@ -56,10 +53,9 @@ def create_item():
     
     new_item = table_submission(
         id=data.get('id'),
-        first_name=data.get('first_name'),
-        last_name=data.get('last_name'),
-        department=data.get('department'),
-        salary=data.get('salary')
+        name=data.get('name'),
+        email=data.get('email'),
+        message=data.get('message')
     )
 
     try:
@@ -80,27 +76,26 @@ def select_all_items():
 # -------FETCH DATA BY THEIR ID----------- 
 @app.route('/all/<int:id>' , methods=['GET'])
 def select_by_id(id):
-    item = db.session.get(table_submission , id)
+    
+    item = table_submission.query.get(id)
     if item: 
         return jsonify(item.to_dict())
-    return jsonify({"error": f"item id {id} not found "})
+    return jsonify({f"error: item id {id}not found "})
 
 # ------DELETE THE ITEM BY THEIR ID ---------
 @app.route('/delete/<int:id>', methods=['DELETE'])
 def delete_item(id):
-    item = db.session.get(table_submission,id)
-    if not item:
-        return jsonify({f"error message that item id {item} not found"})
+    item = db.session.get(table_submission , id)
+    if not id:
+        return jsonify({f"error message that item id {id} not found"})
     else:
         try:
-            db.session.delete(item)
+            db.session.delete(id)
             db.session.commit()
             return jsonify({f"message : item deleted successfully"})
         except Exception as  e:
-            return jsonify({f"error occured": str(e)})
+            return jsonify({f"erroe occured": str(e)})
         
 # ---- RUN THE MAIN APP ------
-if __name__ == '__main__':
-    app.run(port = 5000 , host='0.0.0.0')
-
-    
+# if __name__ == '__main__':
+#     app.run(debug = True , port = 5000 , host='0.0.0.0')
