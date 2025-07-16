@@ -59,9 +59,10 @@ def create_item():
     
     new_item = table_submission(
         id=data.get('id'),
-        name=data.get('name'),
-        email=data.get('email'),
-        message=data.get('message')
+        first_name=data.get('first_name'),
+        last_name=data.get('last_name'),
+        department=data.get('department'),
+        salary=data.get('salary')
     )
 
     try:
